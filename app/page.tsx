@@ -1,65 +1,163 @@
-import Image from "next/image";
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { GROUPS, KanaType } from "../lib/kana";
+
+const STUDY_HISTORY_KEY = "kana_flashcards_study_history_v1";
+
+type StudyHistoryEntry = {
+  id: string;
+  finishedAt: string;
+  type: KanaType;
+  groups: string[];
+  accuracy: number;
+  incorrect: number;
+  total: number;
+  attempts: number;
+  mode: "full" | "incorrect-only";
+};
+
+function readHistory(): StudyHistoryEntry[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = localStorage.getItem(STUDY_HISTORY_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as StudyHistoryEntry[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 export default function Home() {
+  const [type, setType] = useState<KanaType>("hiragana");
+  const [selected, setSelected] = useState<string[]>(["a", "ka"]);
+  const [history, setHistory] = useState<StudyHistoryEntry[]>(readHistory);
+
+  const query = useMemo(() => {
+    const g = selected.join(",");
+    return `/study?type=${type}&groups=${encodeURIComponent(g)}`;
+  }, [type, selected]);
+
+  function toggleGroup(g: string) {
+    setSelected((prev) =>
+      prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g],
+    );
+  }
+
+  function selectAll() {
+    setSelected([...GROUPS]);
+  }
+
+  function clearAll() {
+    setSelected([]);
+  }
+
+  function clearHistory() {
+    localStorage.removeItem(STUDY_HISTORY_KEY);
+    setHistory([]);
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main style={{ maxWidth: 900, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
+      <h1 style={{ fontSize: 28, marginBottom: 10, color: "var(--foreground)" }}>Kana Flashcards</h1>
+      <p style={{ opacity: 0.8, marginBottom: 20, color: "var(--foreground)" }}>
+        Escolha Hiragana/Katakana e quais grupos (a, ka, sa...) voce quer treinar.
+      </p>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+        <button
+          className={`btn ${type === "hiragana" ? "btn-active" : ""}`}
+          onClick={() => setType("hiragana")}
+        >
+          Hiragana
+        </button>
+        <button
+          className={`btn ${type === "katakana" ? "btn-active" : ""}`}
+          onClick={() => setType("katakana")}
+        >
+          Katakana
+        </button>
+
+        <div style={{ flex: 1 }} />
+
+        <button onClick={selectAll} className="btn">
+          Selecionar tudo
+        </button>
+        <button onClick={clearAll} className="btn">
+          Limpar
+        </button>
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 20 }}>
+        {GROUPS.map((g) => {
+          const active = selected.includes(g);
+          return (
+            <button
+              key={g}
+              onClick={() => toggleGroup(g)}
+              className={`btn ${active ? "btn-active" : ""}`}
+              style={{ borderRadius: 999, minWidth: 56 }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              {g}
+            </button>
+          );
+        })}
+      </div>
+
+      <Link
+        href={query}
+        className={`btn btn-primary ${selected.length ? "" : "btn-disabled"}`}
+        style={{ display: "inline-block", textDecoration: "none" }}
+      >
+        Comecar
+      </Link>
+
+      {!selected.length && <p style={{ marginTop: 10, color: "#b00" }}>Selecione pelo menos 1 grupo.</p>}
+
+      <section style={{ marginTop: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <h3 style={{ fontSize: 20, margin: 0 }}>Historico recente</h3>
+          {history.length > 0 && (
+            <button onClick={clearHistory} className="btn">
+              Limpar historico
+            </button>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        {history.length === 0 ? (
+          <p style={{ opacity: 0.75, margin: 0 }}>Nenhum teste concluido ainda.</p>
+        ) : (
+          <div style={{ border: "1px solid #eee", borderRadius: 12, overflow: "hidden" }}>
+            {history.slice(0, 10).map((entry, index) => (
+              <div
+                key={entry.id}
+                style={{
+                  padding: "12px 14px",
+                  borderTop: index === 0 ? "none" : "1px solid #eee",
+                  display: "grid",
+                  gap: 4,
+                }}
+              >
+                <div style={{ fontSize: 14, opacity: 0.8 }}>
+                  {new Date(entry.finishedAt).toLocaleString("pt-BR")} | {entry.type} |{" "}
+                  {entry.mode === "incorrect-only" ? "rev so errados" : "sessao completa"}
+                </div>
+                <div>
+                  Accuracy <strong>{entry.accuracy}%</strong> | Incorrect <strong>{entry.incorrect} / {entry.total}</strong> | Attempts{" "}
+                  <strong>{entry.attempts}</strong>
+                </div>
+                <div style={{ fontSize: 13, opacity: 0.75 }}>
+                  Grupos: {entry.groups.length ? entry.groups.join(", ") : "-"}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
   );
 }
