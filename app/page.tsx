@@ -62,13 +62,13 @@ export default function Home() {
   }
 
   return (
-    <main style={{ maxWidth: 900, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
+    <main className="app-shell">
       <h1 style={{ fontSize: 28, marginBottom: 10, color: "var(--foreground)" }}>Kana Flashcards</h1>
       <p style={{ opacity: 0.8, marginBottom: 20, color: "var(--foreground)" }}>
         Escolha Hiragana/Katakana e quais grupos (a, ka, sa...) voce quer treinar.
       </p>
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+      <div className="home-top-controls">
         <button
           className={`btn ${type === "hiragana" ? "btn-active" : ""}`}
           onClick={() => setType("hiragana")}
@@ -82,7 +82,7 @@ export default function Home() {
           Katakana
         </button>
 
-        <div style={{ flex: 1 }} />
+        <div className="home-spacer" />
 
         <button onClick={selectAll} className="btn">
           Selecionar tudo
@@ -92,7 +92,7 @@ export default function Home() {
         </button>
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 20 }}>
+      <div className="home-group-grid">
         {GROUPS.map((g) => {
           const active = selected.includes(g);
           return (
@@ -110,8 +110,8 @@ export default function Home() {
 
       <Link
         href={query}
-        className={`btn btn-primary ${selected.length ? "" : "btn-disabled"}`}
-        style={{ display: "inline-block", textDecoration: "none" }}
+        className={`btn btn-primary start-link ${selected.length ? "" : "btn-disabled"}`}
+        style={{ textDecoration: "none" }}
       >
         Comecar
       </Link>
@@ -119,7 +119,7 @@ export default function Home() {
       {!selected.length && <p style={{ marginTop: 10, color: "#b00" }}>Selecione pelo menos 1 grupo.</p>}
 
       <section style={{ marginTop: 24 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <div className="history-header">
           <h3 style={{ fontSize: 20, margin: 0 }}>Historico recente</h3>
           {history.length > 0 && (
             <button onClick={clearHistory} className="btn">

@@ -297,7 +297,7 @@ function StudySession({
 
   if (!total) {
     return (
-      <main style={{ maxWidth: 900, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
+      <main className="app-shell">
         <h1 style={{ fontSize: 24 }}>Sem cards nesse filtro</h1>
         <p style={{ opacity: 0.8 }}>Provavelmente o dataset ainda nao tem esses grupos completos.</p>
         <button onClick={() => router.push("/")} className="btn">
@@ -308,34 +308,27 @@ function StudySession({
   }
 
   return (
-    <main style={{ maxWidth: 900, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+    <main className="app-shell">
+      <div className="study-topbar">
         <button onClick={() => router.push("/")} className="btn">
           Voltar
         </button>
-        <div style={{ flex: 1 }} />
+        <div className="study-spacer" />
 
-        <div style={{ opacity: 0.85 }}>
+        <div className="study-stats">
           <strong>Accuracy</strong> {accuracy}% | <strong>Remaining</strong> {remaining} | <strong>Incorrect</strong>{" "}
           {incorrectSet.size} / {sessionTotal}
         </div>
       </div>
 
-      <div
-        style={{
-          border: "1px solid #eee",
-          borderRadius: 16,
-          padding: 24,
-          boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
-        }}
-      >
+      <div className="study-card">
         {!finished ? (
           <>
-            <div style={{ textAlign: "center", fontSize: 96, lineHeight: 1.1, margin: "20px 0" }}>
+            <div className="study-kana">
               {current?.kana}
             </div>
 
-            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 14 }}>
+            <div className="study-actions">
               {!revealedThisCard && (
                 <button onClick={handleReveal} className="btn">
                   Mostrar resposta
@@ -359,7 +352,7 @@ function StudySession({
               </p>
             )}
 
-            <div style={{ display: "flex", justifyContent: "center" }}>
+            <div className="study-input-wrap">
               <input
                 ref={inputRef}
                 value={input}
@@ -397,38 +390,33 @@ function StudySession({
                 autoComplete="off"
                 spellCheck={false}
                 disabled={revealedThisCard}
-                className={`kana-input ${feedback === "correct" ? "is-correct" : ""} ${feedback === "wrong" ? "is-wrong" : ""}`}
-                style={{
-                  width: "min(520px, 100%)",
-                  padding: "14px 16px",
-                  borderRadius: 14,
-                  border: "1px solid #d0d5dd",
-                  fontSize: 18,
-                }}
+                className={`study-input kana-input ${feedback === "correct" ? "is-correct" : ""} ${feedback === "wrong" ? "is-wrong" : ""}`}
               />
             </div>
 
-            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 14 }}>
+            <div className="study-footer-actions">
               <button onClick={goNextAsSkip} className="btn">
                 Proximo
               </button>
             </div>
           </>
         ) : (
-          <div style={{ textAlign: "center", padding: "30px 0" }}>
+          <div className="finish-panel">
             <h2 style={{ fontSize: 26, marginBottom: 8 }}>Finalizado</h2>
             <p style={{ opacity: 0.85 }}>
               Accuracy: <strong>{accuracy}%</strong> - Incorrect <strong>{incorrectSet.size} / {sessionTotal}</strong>
             </p>
-            <button onClick={restart} style={{ marginTop: 16 }} className="btn btn-primary">
-              Recomecar
-            </button>
-
-            {incorrectSet.size > 0 && (
-              <button onClick={startIncorrectOnly} className="btn">
-                Treinar so os errados
+            <div className="finish-actions">
+              <button onClick={restart} className="btn btn-primary">
+                Recomecar
               </button>
-            )}
+
+              {incorrectSet.size > 0 && (
+                <button onClick={startIncorrectOnly} className="btn">
+                  Treinar so os errados
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>

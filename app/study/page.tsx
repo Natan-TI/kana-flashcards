@@ -13,12 +13,11 @@ export default function StudyPage() {
 
 function StudyLoading() {
   return (
-    <main style={{ maxWidth: 900, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
+    <main className="app-shell">
       <div style={{ opacity: 0.8 }}>Carregando…</div>
     </main>
   );
 }
-
 
 
 
